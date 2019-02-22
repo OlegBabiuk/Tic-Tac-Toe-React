@@ -59,6 +59,14 @@ class PlayField extends React.Component {
     }
   }
 
+  // componentDidUpdate(prevProps, prevState) {
+  //   const { stepsHistory: newHistory } = this.state;
+  //   const { stepsHistory: oldHistory } = prevState;
+  //   if (newHistory !== oldHistory) {
+  //     this.gameEnd(this.state);
+  //   }
+  // }
+
   onClickRevenge() {
     this.setState({
       stepsHistory: [],
@@ -67,7 +75,7 @@ class PlayField extends React.Component {
   }
 
   onePlayer(playCell) {
-    const { stepsHistory, player1, player2 } = this.state;
+    const { stepsHistory, player1 } = this.state;
     const currentStep = {
       row: playCell.row,
       col: playCell.col,
@@ -82,16 +90,17 @@ class PlayField extends React.Component {
       ));
 
     if (!isfind) {
-      this.setState(prevState => ({
-        currentSign: player1.play,
-        stepsHistory: [...prevState.stepsHistory, currentStep],
-      }));
-
-      setTimeout(() => {
-        const { stepsHistory: newHistory } = this.state;
-        this.checkWin({ ...playCell, newHistory, currentSign: player1.play });
-        this.gameEnd();
-      });
+      this.setState(
+        prevState => ({
+          currentSign: player1.play,
+          stepsHistory: [...prevState.stepsHistory, currentStep],
+        }),
+        () => {
+          const { stepsHistory: newHistory } = this.state;
+          this.checkWin({ ...playCell, newHistory, currentSign: player1.play });
+          this.gameEnd();
+        },
+      );
     }
     // реализовать ход PC
   }
@@ -114,16 +123,16 @@ class PlayField extends React.Component {
       ));
 
     if (!isfind) {
-      this.setState(prevState => ({
-        currentSign,
-        stepsHistory: [...prevState.stepsHistory, currentStep],
-      }));
-
-      setTimeout(() => {
-        const { stepsHistory: newHistory } = this.state;
-        this.checkWin({ ...playCell, currentSign, newHistory });
-        this.gameEnd();
-      });
+      this.setState(
+        prevState => ({
+          currentSign,
+          stepsHistory: [...prevState.stepsHistory, currentStep],
+        }),
+        () => {
+          const { stepsHistory: newHistory } = this.state;
+          this.checkWin({ ...playCell, currentSign, newHistory });
+        },
+      );
     }
   }
 
@@ -133,8 +142,8 @@ class PlayField extends React.Component {
 
   gameEnd() {
     setTimeout(() => {
-      const { stepsHistory, isModalWindowShow } = this.state;
-      if (stepsHistory.length === 9 && !isModalWindowShow) {
+      const { stepsHistory: newHistory, isModalWindowShow } = this.state;
+      if (newHistory.length === 9 && !isModalWindowShow) {
         this.setState({
           currentSign: '?', isModalWindowShow: true,
         });
@@ -154,9 +163,7 @@ class PlayField extends React.Component {
     const routes = [{ row }, { col }, { diagonalLeft }, { diagonalRight }];
     routes.forEach((route) => {
       const resultArr = Object.entries(route);
-      const stepArr = resultArr[0];
-      const key = stepArr[0];
-      const value = stepArr[1];
+      const { 0: key, 1: value } = resultArr[0];
       const checkRoute = newHistory
         .filter(step => (step[key] === value ? value : ''));
 
@@ -168,13 +175,16 @@ class PlayField extends React.Component {
               ? 'player1'
               : 'player2';
             const winCount = prevState[user].win + 1;
-
             return {
               isModalWindowShow: true,
               [user]: { win: winCount, play: currentSign },
             };
+          },
+          () => {
+            this.gameEnd();
           });
         }
+        this.gameEnd();
       }
     });
   }

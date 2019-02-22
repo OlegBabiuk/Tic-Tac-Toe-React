@@ -11,7 +11,6 @@ function ModalWindow(props) {
     currentSign,
     onClickRevenge,
   } = props;
-
   return (
     <div className="modal">
       <h3 className="result">
@@ -46,7 +45,7 @@ ModalWindow.propTypes = {
 ModalWindow.defaultProps = {
   player1: {},
   player2: {},
-  currentSign: '?',
+  currentSign: '???',
   onClickRevenge: () => console.log("onClickRevenge didn't pass"),
 };
 
