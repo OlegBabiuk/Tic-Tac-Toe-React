@@ -110,6 +110,10 @@ p {
 }
 .modal span {
   font-size: 1.5em;
+  margin: 0 10px;
+}
+.modal b {
+  margin: 0 15px 0 10px;
 }
 .modal div {
   color: white;

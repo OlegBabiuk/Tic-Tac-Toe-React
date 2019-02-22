@@ -30,6 +30,7 @@ class NavPanel extends React.Component {
           isActiveRestart: !prevState.isActiveRestart,
         }
       ));
+      onClick('restart');
     }
   }
 

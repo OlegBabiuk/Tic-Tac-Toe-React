@@ -6,34 +6,33 @@ class Game extends React.Component {
   constructor() {
     super();
     this.state = {
+      restartGame: false,
       typeGame: '',
-      player1: { win: 1, play: 'X' },
-      player2: { win: 2, play: 'O' },
     };
+    this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick(value) {
     if (value === 'restart') {
-      this.setState(() => (
-        {
-          player1: { win: 0, play: 'X' },
-          player2: { win: 0, play: 'O' },
-        }
-      ));
-    } else {
-      this.setState(() => (
+      this.setState(
+        { restartGame: true, typeGame: '' },
+      );
+    }
+    if (value === 'pc' || value === 'human') {
+      this.setState(
         {
           typeGame: value,
-        }
-      ));
+          restartGame: false,
+        },
+      );
     }
   }
 
   render() {
-    const gameData = { ...this.state };
+    const { typeGame, restartGame } = this.state;
     return (
       <div className="ticTacToe">
-        <PlayField gameData={gameData} />
+        <PlayField typeGame={typeGame} restartGame={restartGame} />
         <NavPanel onClick={this.handleClick} />
       </div>
     );
