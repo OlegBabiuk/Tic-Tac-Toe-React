@@ -5,11 +5,28 @@ import ModalWindow from './modal-window';
 import RowCells from './row-cells';
 
 class PlayField extends React.Component {
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.typeGame !== prevState.typeGame) {
+      return {
+        typeGame: nextProps.typeGame,
+      };
+    }
+
+    if (nextProps.restartGame !== prevState.restartGame) {
+      return {
+        restartGame: nextProps.restartGame,
+      };
+    }
+    return null;
+  }
+
   constructor(props) {
     super(props);
     this.state = {
       fieldSize: Array(3).fill(null),
       isModalWindowShow: false,
+      typeGame: null,
+      restartGame: null,
       player1: { win: 0, play: 'X' },
       player2: { win: 0, play: 'O' },
       currentSign: '?',
@@ -42,21 +59,15 @@ class PlayField extends React.Component {
     this.onClickRevenge = this.onClickRevenge.bind(this);
   }
 
-  componentWillReceiveProps(newProps) {
-    const { typeGame, restartGame } = newProps;
-
-    if (restartGame) {
+  componentDidUpdate(prevProps) {
+    const { typeGame } = this.state;
+    const { restartGame } = this.props;
+    if (restartGame !== prevProps.restartGame) {
       this.clearHistiry();
     }
-    if (typeGame === 'human') {
-      this.play = this.twoPlayer;
-    }
-    if (typeGame === 'pc') {
+    if (typeGame !== prevProps.typeGame) {
+      console.log('typeGame:', typeGame);
       this.allCells = this.generateAllCells();
-      this.play = this.onePlayer;
-    }
-    if (!typeGame) {
-      this.play = () => {};
     }
   }
 
@@ -235,8 +246,15 @@ class PlayField extends React.Component {
     return allCells;
   }
 
-  play() {
-    this.setState();
+  play(data) {
+    const { typeGame } = this.state;
+    if (typeGame === 'human') {
+      this.twoPlayer(data);
+    }
+
+    if (typeGame === 'pc') {
+      this.onePlayer(data);
+    }
   }
 
   gameOver(winer) {

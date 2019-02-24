@@ -21,16 +21,16 @@ class NavPanel extends React.Component {
         {
           isShowTypeGame: !prevState.isShowTypeGame,
         }
-      ));
-      onClick('restart');
+      ),
+      () => onClick('restart'));
     } else {
       this.setState(prevState => (
         {
           isShowTypeGame: !prevState.isShowTypeGame,
           isActiveRestart: !prevState.isActiveRestart,
         }
-      ));
-      onClick('restart');
+      ),
+      () => onClick('restart'));
     }
   }
 
@@ -40,8 +40,8 @@ class NavPanel extends React.Component {
       {
         isShowTypeGame: !prevState.isShowTypeGame,
       }
-    ));
-    onClick(type);
+    ),
+    () => onClick(type));
   }
 
   render() {
