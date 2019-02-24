@@ -52,20 +52,13 @@ class PlayField extends React.Component {
       this.play = this.twoPlayer;
     }
     if (typeGame === 'pc') {
+      this.allCells = this.generateAllCells();
       this.play = this.onePlayer;
     }
     if (!typeGame) {
       this.play = () => {};
     }
   }
-
-  // componentDidUpdate(prevProps, prevState) {
-  //   const { stepsHistory: newHistory } = this.state;
-  //   const { stepsHistory: oldHistory } = prevState;
-  //   if (newHistory !== oldHistory) {
-  //     this.gameEnd(this.state);
-  //   }
-  // }
 
   onClickRevenge() {
     this.setState({
@@ -97,12 +90,19 @@ class PlayField extends React.Component {
         }),
         () => {
           const { stepsHistory: newHistory } = this.state;
-          this.checkWin({ ...playCell, newHistory, currentSign: player1.play });
-          this.gameEnd();
+          const winer = this.checkWin({
+            ...playCell,
+            currentSign: player1.play,
+            newHistory,
+          });
+          if (winer) {
+            this.gameOver(winer);
+          } else {
+            this.pcStep();
+          }
         },
       );
     }
-    // реализовать ход PC
   }
 
   twoPlayer(playCell) {
@@ -116,13 +116,13 @@ class PlayField extends React.Component {
       diagonalRight: playCell.diagonalRight,
       player: currentSign,
     };
-    const isfind = stepsHistory
+    const isFind = stepsHistory
       .some(step => (
         step.row === playCell.row
           && step.col === playCell.col
       ));
 
-    if (!isfind) {
+    if (!isFind) {
       this.setState(
         prevState => ({
           currentSign,
@@ -130,25 +130,132 @@ class PlayField extends React.Component {
         }),
         () => {
           const { stepsHistory: newHistory } = this.state;
-          this.checkWin({ ...playCell, currentSign, newHistory });
+          const winer = this.checkWin({ ...playCell, currentSign, newHistory });
+          this.gameOver(winer);
         },
       );
     }
+  }
+
+  pcStep() {
+    const { stepsHistory, player1, player2 } = this.state;
+    const emptyCells = this.allCells
+      .filter((cell) => {
+        const findCell = stepsHistory.find(step => (
+          step.row === cell.row
+          && step.col === cell.col
+        ));
+        return !findCell;
+      });
+    const attackStep = this.possibleWin({
+      stepsHistory, emptyCells, playSign: player2.play,
+    });
+    const defenseStep = this.possibleWin({
+      stepsHistory, emptyCells, playSign: player1.play,
+    });
+    const bestStep = this.bestStep({ emptyCells, playSign: player2.play });
+    const randomStep = this.randomStep({ emptyCells, playSign: player2.play });
+    const nextStep = attackStep || defenseStep || bestStep || randomStep;
+    this.setState((prevState => (
+      {
+        currentSign: player2.play,
+        stepsHistory: [...prevState.stepsHistory, nextStep],
+      }
+    )),
+    () => {
+      const { stepsHistory: newHistory } = this.state;
+      const winer = this.checkWin(
+        { ...nextStep, newHistory },
+      );
+      this.gameOver(winer);
+    });
+  }
+
+  possibleWin(data) {
+    const { player2 } = this.state;
+    const { stepsHistory, emptyCells, playSign } = data;
+    let result = null;
+    emptyCells.forEach((cell) => {
+      const duplicateHistory = [...stepsHistory];
+      const newStep = { ...cell, currentSign: playSign, player: playSign };
+      duplicateHistory.push(newStep);
+      const winer = this.checkWin({ ...newStep, newHistory: duplicateHistory });
+      if (winer) {
+        result = { ...newStep, currentSign: player2.play, player: player2.play };
+      }
+    });
+    return result;
+  }
+
+  bestStep(data) {
+    const { emptyCells, playSign } = data;
+    const { fieldSize } = this.state;
+    const centerIndex = Math.ceil(fieldSize.length / 2);
+    const newStep = emptyCells.filter((cell) => {
+      const isFind = (cell.row === centerIndex && cell.col === centerIndex)
+        || (cell.row === centerIndex - 1 && cell.col === centerIndex - 1)
+        || (cell.row === centerIndex - 1 && cell.col === centerIndex + 1)
+        || (cell.row === centerIndex + 1 && cell.col === centerIndex - 1)
+        || (cell.row === centerIndex + 1 && cell.col === centerIndex + 1);
+      return isFind;
+    });
+    if (!newStep[0]) {
+      return null;
+    }
+    return { ...newStep[0], currentSign: playSign, player: playSign };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  randomStep(data) {
+    const { emptyCells, playSign } = data;
+    const randomIndex = Math.floor(Math.random() * emptyCells.length);
+    return {
+      ...emptyCells[randomIndex], currentSign: playSign, player: playSign,
+    };
+  }
+
+  generateAllCells() {
+    const { fieldSize } = this.state;
+    const baseReversNumber = fieldSize.length + 1;
+    let allCells = [];
+
+    fieldSize.forEach((row, index) => {
+      const numbRow = index + 1;
+      const cells = fieldSize.map((col, i) => {
+        const numbCol = i + 1;
+        return {
+          row: numbRow,
+          col: numbCol,
+          diagonalLeft: numbCol === numbRow,
+          diagonalRight: numbCol === (baseReversNumber - numbRow),
+        };
+      });
+      allCells = [...allCells, ...cells];
+    });
+    return allCells;
   }
 
   play() {
     this.setState();
   }
 
-  gameEnd() {
-    setTimeout(() => {
-      const { stepsHistory: newHistory, isModalWindowShow } = this.state;
-      if (newHistory.length === 9 && !isModalWindowShow) {
-        this.setState({
-          currentSign: '?', isModalWindowShow: true,
-        });
-      }
-    });
+  gameOver(winer) {
+    const { fieldSize, stepsHistory: newHistory } = this.state;
+    const numberOfAllCells = fieldSize.length ** 2;
+    let result = winer;
+    if (newHistory.length >= numberOfAllCells && !winer) {
+      result = { currentSign: 'draw' };
+      this.setState({
+        ...result,
+        isModalWindowShow: true,
+      });
+    }
+    if (winer) {
+      this.setState({
+        ...result,
+        isModalWindowShow: true,
+      });
+    }
   }
 
   checkWin(data) {
@@ -161,32 +268,31 @@ class PlayField extends React.Component {
       newHistory,
     } = data;
     const routes = [{ row }, { col }, { diagonalLeft }, { diagonalRight }];
+    const { fieldSize, player1 } = this.state;
+    const numberCellsToCheck = fieldSize.length;
+    let winer = null;
+
     routes.forEach((route) => {
       const resultArr = Object.entries(route);
       const { 0: key, 1: value } = resultArr[0];
       const checkRoute = newHistory
         .filter(step => (step[key] === value ? value : ''));
 
-      if (checkRoute.length === 3) {
+      if (checkRoute.length === numberCellsToCheck) {
         const flag = checkRoute.every(cell => cell.player === currentSign);
         if (flag) {
-          this.setState((prevState) => {
-            const user = prevState.player1.play === currentSign
-              ? 'player1'
-              : 'player2';
-            const winCount = prevState[user].win + 1;
-            return {
-              isModalWindowShow: true,
-              [user]: { win: winCount, play: currentSign },
-            };
-          },
-          () => {
-            this.gameEnd();
-          });
+          const user = player1.play === currentSign
+            ? 'player1'
+            : 'player2';
+          // eslint-disable-next-line react/destructuring-assignment
+          const winCount = this.state[user].win + 1;
+          winer = {
+            [user]: { win: winCount, play: currentSign },
+          };
         }
-        this.gameEnd();
       }
     });
+    return winer;
   }
 
   clearHistiry() {

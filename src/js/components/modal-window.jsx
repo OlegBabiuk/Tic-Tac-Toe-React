@@ -14,9 +14,16 @@ function ModalWindow(props) {
   return (
     <div className="modal">
       <h3 className="result">
-        Player
-        <span>{currentSign}</span>
-        WIN
+        {currentSign === 'draw'
+          ? 'Nobody wins'
+          : (
+            <p>
+              Player
+              <span>{currentSign}</span>
+              WIN
+            </p>
+          )
+        }
       </h3>
       <p>total score</p>
       <p>

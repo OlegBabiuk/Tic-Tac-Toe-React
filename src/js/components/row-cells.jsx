@@ -7,6 +7,7 @@ function RowCells(props) {
   const {
     row, onClick, steps, fieldSize,
   } = props;
+  const baseReversNumber = fieldSize.length + 1;
   const className = `row row${row}`;
   const colCells = fieldSize
     .map((col, index) => {
@@ -21,7 +22,7 @@ function RowCells(props) {
             steps.filter(step => step.col === numbCol)
           }
           diagonalLeft={numbCol === row}
-          diagonalRight={numbCol === (4 - row)}
+          diagonalRight={numbCol === (baseReversNumber - row)}
         />
       );
     });
