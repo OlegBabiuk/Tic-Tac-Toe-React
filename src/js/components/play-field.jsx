@@ -66,7 +66,6 @@ class PlayField extends React.Component {
       this.clearHistiry();
     }
     if (typeGame !== prevProps.typeGame) {
-      console.log('typeGame:', typeGame);
       this.allCells = this.generateAllCells();
     }
   }
