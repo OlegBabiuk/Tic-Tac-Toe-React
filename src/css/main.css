@@ -74,19 +74,22 @@ p {
 }
 .mainBtn {
   display: block;
+  cursor: pointer;
 }
 .choiceBtn {
   justify-content: space-around;
 }
-.choiceBtn a {
+.choiceBtn span {
   display: block;
   font-size: 25px;
   text-align: center;
   padding: 5px;
   transition: all 0,2s;
+  cursor: pointer;
 }
-.choiceBtn a:hover {
+.choiceBtn span:hover {
   outline: 1px solid black;
+  cursor: pointer;
 }
 .modal {
   position: absolute;
@@ -107,16 +110,22 @@ p {
 }
 .modal span {
   font-size: 1.5em;
+  margin: 0 10px;
 }
-.modal a {
+.modal b {
+  margin: 0 15px 0 10px;
+}
+.modal div {
   color: white;
   display: inline-block;
   border: 1px solid white;
   padding: 15px;
   border-radius: 15px;
   transition: all 0.2s;
+  cursor: pointer;
 }
-.modal a:hover {
+.modal div:hover {
   color: black;
   background-color: white;
+  cursor: pointer;
 }

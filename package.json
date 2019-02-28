@@ -1,11 +1,14 @@
 {
   "name": "webpack-react",
+  "homepage": "https://github.com/OlegBabiuk/Tic-Tac-Toe-React/dist/",
   "version": "1.0.0",
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
     "build": "webpack --mode=production",
-    "start": "webpack-dev-server --open --mode=development"
+    "start": "webpack-dev-server --open --mode=development",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "repository": {
     "type": "git",
@@ -16,7 +19,6 @@
   "bugs": {
     "url": "https://github.com/OlegBabiuk/Tic-Tac-Toe-React"
   },
-  "homepage": "https://github.com/OlegBabiuk/Tic-Tac-Toe-React#readme",
   "devDependencies": {
     "@babel/core": "^7.3.3",
     "@babel/plugin-transform-runtime": "^7.2.0",
@@ -41,6 +43,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.3.1",
+    "gh-pages": "^2.0.1",
+    "prop-types": "^15.7.2",
     "react": "^16.8.2",
     "react-dom": "^16.8.2"
   },
